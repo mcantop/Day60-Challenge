@@ -8,14 +8,34 @@
 import SwiftUI
 
 struct ContentView: View {
+    let networkService = NetworkSerivce()
+    @State var users = [User]()
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+        NavigationView {
+            List {
+                ForEach(users, id: \.self) { user in
+                    NavigationLink(destination: {
+                        
+                        UserDetails(user: user)
+                    }, label: {
+                        HStack {
+                            Image(systemName: user.isActive ? "circle.fill" : "circle")
+                                .foregroundColor(user.isActive ? .green : .gray)
+                            Text(user.name)
+                        }
+                    })
+                }
+            }
+            .navigationTitle("Users: \(users.count)")
+            .task {
+                do {
+                    users = try await networkService.getUsers()
+                } catch {
+                    print(error)
+                }
+            }
         }
-        .padding()
     }
 }
 
